@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DateUse data-sync 控制台</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif; margin: 0; padding: 24px; background: #f5f7fb; color: #1f2937; }
+      .card { max-width: 960px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 6px 24px rgba(15,23,42,.08); }
+      h1 { margin-top: 0; font-size: 24px; }
+      button { background: #2563eb; color: white; border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; margin-right: 8px; }
+      button.secondary { background: #4b5563; }
+      pre { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 12px; overflow: auto; min-height: 140px; }
+      .hint { color: #64748b; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>DateUse data-sync 控制台</h1>
+      <p class="hint">前端端口 8082，后端代理到 /api（实际后端 8002）。</p>
+      <p>
+        <button id="healthBtn" class="secondary">检查健康状态</button>
+        <button id="runBtn">执行全量工程师映射</button>
+      </p>
+      <pre id="output">点击按钮开始...</pre>
+    </div>
+
+    <script>
+      const output = document.getElementById('output');
+      const setOut = (obj) => {
+        if (typeof obj === 'string') {
+          output.textContent = obj;
+          return;
+        }
+        output.textContent = JSON.stringify(obj, null, 2);
+      };
+
+      document.getElementById('healthBtn').addEventListener('click', async () => {
+        try {
+          const res = await fetch('/health');
+          const data = await res.json();
+          setOut(data);
+        } catch (e) {
+          setOut(String(e));
+        }
+      });
+
+      document.getElementById('runBtn').addEventListener('click', async () => {
+        setOut('运行中，请稍候...');
+        try {
+          const res = await fetch('/api/map-admin-ids?all=true');
+          const data = await res.json();
+          setOut(data);
+        } catch (e) {
+          setOut(String(e));
+        }
+      });
+    </script>
+  </body>
+</html>
