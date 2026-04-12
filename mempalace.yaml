@@ -1,0 +1,14 @@
+wing: clm_review_tool
+rooms:
+  - name: ai_recipe_roadmap
+    description: AI菜谱路线图规划与菜谱结构化数据
+  - name: frontend
+    description: 前端开发记忆：组件、UI规范、用户反馈
+  - name: backend
+    description: 后端开发记忆：API契约、数据模型、业务规则、飞书集成
+  - name: documentation
+    description: 文档与交接记录：会议、决策、问题排查、验收标准
+  - name: deployment
+    description: 部署与运维记忆：云环境、Docker配置、监控
+  - name: general
+    description: 通用项目记忆：团队、流程、约定、进度
