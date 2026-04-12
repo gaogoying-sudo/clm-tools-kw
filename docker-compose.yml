@@ -30,7 +30,7 @@ services:
       DATABASE_URL: mysql+pymysql://${MYSQL_USER:-clm}:${MYSQL_PASSWORD:-clm_pass_2026}@mysql:3306/${MYSQL_DATABASE:-clm_review}
       DEBUG: "true"
       use_mock_data: "true"
-      ADMIN_TOKEN: ${ADMIN_TOKEN:-clm_admin_dev}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
       FEISHU_APP_ID: ${FEISHU_APP_ID:-}
       FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
       FEISHU_DRY_RUN: "true"
