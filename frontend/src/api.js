@@ -1,5 +1,6 @@
 const BASE = '/api';
 
+// Use a valid storage key (was damaged to '***')
 const ADMIN_TOKEN_STORAGE_KEY = 'clm_admin_token';
 
 export function setAdminToken(token) {
@@ -82,5 +83,17 @@ export const api = {
     if (startDate) params.set('start_date', startDate);
     if (endDate) params.set('end_date', endDate);
     return `${BASE}/admin/export?${params.toString()}`;
+  },
+
+  // QA Records (new)
+  getQARecords: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/admin/qa-records${qs ? `?${qs}` : ''}`);
+  },
+
+  // Search (new - with cache)
+  searchData: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/admin/search${qs ? `?${qs}` : ''}`);
   },
 };
