@@ -12,12 +12,22 @@
 - 编写 WORK_PLAN.md (详细开发计划)
 - Git 本地 commit (2359168)
 
-**01:05** [小强] 治理制度建设
+**01:05** [小强] 治理制度建设 v1
 - 编写 GOVERNANCE.md (三层治理：Memory → docs/ → graphify)
 - 创建 TASK_BOARD.md (任务看板)
 - 创建 RESOURCE.md (资源登记)
 - 创建 decisions/001-tech-stack.md (首个 ADR)
 - 更新 progress.md 格式
+
+**01:15** [小强] 治理制度 v2.0 落地（五层架构）
+- 融合 MemPalace + Obsidian + graphify 到治理架构
+- 创建 mempalace.yaml (6 rooms: ai_recipe_roadmap/frontend/backend/documentation/deployment/general)
+- 创建 Obsidian Vault: ~/Documents/CLM-Obsidian/ + 项目概览笔记
+- 创建 AGENTS.md (包含 MemPalace + graphify + Obsidian 规则)
+- 安装 graphify (v0.4.2, Python 3.12 venv)
+- 生成初始图谱: 182 nodes, 332 edges, 25 communities
+- Memory 已更新
+- Git commit (683d032)
 
 **下一步：**
 1. 确认治理制度方案（等用户确认）
