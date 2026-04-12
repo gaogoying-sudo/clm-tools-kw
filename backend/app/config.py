@@ -5,16 +5,20 @@ load_dotenv()
 
 
 class Settings:
-    # MySQL
-    MYSQL_HOST: str = os.getenv("MYSQL_HOST", "localhost")
-    MYSQL_PORT: int = int(os.getenv("MYSQL_PORT", "3306"))
-    MYSQL_USER: str = os.getenv("MYSQL_USER", "clm")
-    MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD", "clm123")
-    MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "clm_review")
+    # MySQL — 优先使用完整 DATABASE_URL（Docker 场景），否则用分拆变量
+    _database_url: str = os.getenv("DATABASE_URL", "")
 
     @property
-    def DATABASE_URL(self):
+    def DATABASE_URL(self) -> str:
+        if self._database_url:
+            return self._database_url
         return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}?charset=utf8mb4"
+
+    MYSQL_HOST: str = os.getenv("MYSQL_HOST", "mysql")
+    MYSQL_PORT: int = int(os.getenv("MYSQL_PORT", "3306"))
+    MYSQL_USER: str = os.getenv("MYSQL_USER", "clm")
+    MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD", "clm_pass_2026")
+    MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "clm_review")
 
     # 飞书
     FEISHU_APP_ID: str = os.getenv("FEISHU_APP_ID", "")

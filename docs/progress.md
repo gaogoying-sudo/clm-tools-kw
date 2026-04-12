@@ -40,6 +40,15 @@
 - GitHub push 超时（SSH key 或 token 认证问题，需配置）
 - 公司源数据库连接信息待确认
 
+**01:10** [小强] T02 Docker 本地环境验证 完成
+- 启动 Docker Desktop，docker compose up -d
+- 停掉旧容器 clm-review-tool-db-1 和 clm-review-tool-backend-1（端口冲突）
+- 修复 config.py: MYSQL_HOST 默认值 localhost → mysql
+- 修复 config.py: DATABASE_URL 优先读取完整环境变量
+- 三个服务全部运行：MySQL(3307) + Backend(8001) + Frontend(8081)
+- API 验证通过：健康检查、同步今日数据、会话创建、问题流生成
+- Mock 数据质量验证：3道菜、完整功率轨迹/投料时序、异常场景触发题
+
 **用户明确要求记录：**
 - 飞书不要发任何消息（DRY_RUN + TEST_MODE 默认开启）
 - 云服务器部署暂缓，专注本地开发
