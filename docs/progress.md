@@ -40,7 +40,23 @@
 - GitHub push 超时（SSH key 或 token 认证问题，需配置）
 - 公司源数据库连接信息待确认
 
-**01:10** [小强] T02 Docker 本地环境验证 完成
+**01:30** [小强] T102 前端重构完成
+- 全新架构: React Router + 5个页面 + 侧边栏导航
+- TailwindCSS v4 替代内联样式 (3001行新增, 1211行删除)
+- 登录页 /login + 数据看板 /dashboard + 数据检索 /search
+- 原始问答 /qa-records + 经验沉淀 /insights + 系统管理 /settings
+- 修复 api.js ADMIN_TOKEN_STORAGE_KEY 损坏问题
+- 角色权限路由: superadmin/admin/analyst
+- Git commit (90776c8)
+
+**01:35** [小强] T101 数据增强完成
+- 36 位工程师完整入库（基于 DateUse 发现的真实花名册）
+- 近 30 天模拟数据生成：1327 条任务、394 个会话
+- 提交率 86.5%（341/394）
+- 菜谱库 16 道菜（辣椒炒肉/麻婆豆腐/水煮鱼/酸菜鱼等）
+- 每道菜含完整功率轨迹 + 投料时序 + 异常场景
+- 创建 seed_30day_data.py 可重复执行
+
 - 启动 Docker Desktop，docker compose up -d
 - 停掉旧容器 clm-review-tool-db-1 和 clm-review-tool-backend-1（端口冲突）
 - 修复 config.py: MYSQL_HOST 默认值 localhost → mysql
