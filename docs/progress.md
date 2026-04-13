@@ -87,6 +87,22 @@
   - ✅ 前端 5 页面全部正常（登录/看板/检索/问答/系统管理）
 - Git commit pending
 
+**02:30** [小强] T05 数据同步链路打通完成
+- 集成 data-sync 模块到 backend/app/data_sync/
+- 实现 _pull_from_source() 真实数据拉取逻辑
+- 创建同步 API 端点：
+  - GET /api/admin/sync/status - 查看同步状态
+  - POST /api/admin/sync/trigger/today - 手动触发当天同步
+  - POST /api/admin/sync/trigger/history - 手动触发历史同步（mock 模式）
+  - GET /api/admin/sync/config - 查看源数据库配置状态
+- 创建配置文档：docs/DATA_SYNC_SETUP.md
+- 验证结果：
+  - ✅ API 端点全部正常
+  - ✅ Mock 模式同步正常（129 条今日任务，2777 条总任务）
+  - ✅ 源数据库配置检测正常
+- 待用户配置：SOURCE_DB_HOST, SOURCE_DB_USER, SOURCE_DB_PASSWORD
+- Git commit pending
+
 **用户明确要求记录：**
 - 飞书不要发任何消息（DRY_RUN + TEST_MODE 默认开启）
 - 云服务器部署暂缓，专注本地开发

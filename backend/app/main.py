@@ -9,7 +9,7 @@ import logging
 
 from .config import settings
 from .routers import sessions, answers, admin
-from .routers import search
+from .routers import search, sync
 
 logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler(timezone=settings.PUSH_TIMEZONE)
@@ -121,6 +121,7 @@ app.include_router(sessions.router)
 app.include_router(answers.router)
 app.include_router(admin.router)
 app.include_router(search.router)
+app.include_router(sync.router)
 
 
 @app.get("/")
