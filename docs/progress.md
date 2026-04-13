@@ -47,7 +47,15 @@
 - 原始问答 /qa-records + 经验沉淀 /insights + 系统管理 /settings
 - 修复 api.js ADMIN_TOKEN_STORAGE_KEY 损坏问题
 - 角色权限路由: superadmin/admin/analyst
-- Git commit (90776c8)
+**01:45** [小强] T105-T108 全部完成 + GitHub push 阻塞
+- 后端: 创建 search.py (多条件检索 API + 内存缓存层 + /qa-records)
+- 前端: SearchPage 接 /api/admin/search (6条件筛选+分页+缓存命中提示)
+- 前端: QARecordsPage 接 /api/admin/qa-records (三层数据+关键词搜索+CSV/JSON导出)
+- 前端: InsightsPage 接 /api/admin/candidates (审核流程: 草稿→待审→已确认/无效)
+- 前端: SettingsPage 接工程师花名册(36人)+问题模板(7个)+数据源配置(3个连接状态)
+- 修复: api.js ADMIN_TOKEN_STORAGE_KEY 从 *** 修复
+- Git commit: ef37f49
+- GitHub push 阻塞: HTTPS 认证超时，需要 SSH key 配置或 token
 
 **01:35** [小强] T101 数据增强完成
 - 36 位工程师完整入库（基于 DateUse 发现的真实花名册）

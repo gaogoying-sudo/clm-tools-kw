@@ -1,15 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
+// Navigation configuration
 const navItems = [
   { path: '/dashboard', icon: '📊', label: '数据看板' },
   { path: '/search', icon: '🔍', label: '数据检索' },
   { path: '/qa-records', icon: '💬', label: '原始问答' },
   { path: '/insights', icon: '💡', label: '经验沉淀' },
-  { path: '/settings', icon: '⚙️', label: '系统管理' },
+  { path: '/settings', icon: '⚙️', label: '系统管理', roles: ['superadmin'] }, // Restricted
 ]
 
 export function Sidebar({ collapsed, onToggle }) {
   const [location, setLocation] = useState(window.location.hash || '#/dashboard')
+  const [userRole, setUserRole] = useState(localStorage.getItem('clm_role') || 'admin')
+
+  // Listen for hash changes to update active state
+  useEffect(() => {
+    const h = () => {
+      setLocation(window.location.hash || '#/dashboard')
+      setUserRole(localStorage.getItem('clm_role') || 'admin')
+    }
+    window.addEventListener('hashchange', h)
+    return () => window.removeEventListener('hashchange', h)
+  }, [])
 
   const handleClick = (path) => {
     window.location.hash = path
@@ -25,6 +37,14 @@ export function Sidebar({ collapsed, onToggle }) {
 
   const username = localStorage.getItem('clm_username') || '管理员'
 
+  // Filter items based on role
+  const visibleItems = navItems.filter(item => {
+    if (item.roles) {
+      return item.roles.includes(userRole)
+    }
+    return true
+  })
+
   return (
     <aside className={`bg-slate-900 text-white flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-56'}`}>
       {/* Logo */}
@@ -35,7 +55,7 @@ export function Sidebar({ collapsed, onToggle }) {
 
       {/* Navigation */}
       <nav className="flex-1 py-4">
-        {navItems.map(item => {
+        {visibleItems.map(item => {
           const hashPath = item.path
           const isActive = location === hashPath || (location === '#/' && hashPath === '#/dashboard')
           return (
