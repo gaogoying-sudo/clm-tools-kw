@@ -71,7 +71,21 @@
 - 修复 config.py: DATABASE_URL 优先读取完整环境变量
 - 三个服务全部运行：MySQL(3307) + Backend(8001) + Frontend(8081)
 - API 验证通过：健康检查、同步今日数据、会话创建、问题流生成
-- Mock 数据质量验证：3道菜、完整功率轨迹/投料时序、异常场景触发题
+- Mock 数据质量验证：3 道菜、完整功率轨迹/投料时序、异常场景触发题
+
+**02:00** [小强] T109 后端缓存层 API 完成 + T110 端到端验证通过
+- 修复 search.py: timedelta import 位置错误
+- 新增缓存统计 API: GET /api/admin/cache/stats（命中率、条目数、TTL）
+- 新增缓存清除 API: POST /api/admin/cache/clear
+- 缓存命中统计：hits/misses 计数器
+- 验证结果：
+  - ✅ 健康检查 API 正常
+  - ✅ 数据检索 API 正常（125 条今日会话）
+  - ✅ 缓存机制正常（历史数据缓存命中率 50%+）
+  - ✅ 原始问答 API 正常（7 条记录）
+  - ✅ 工程师花名册 API 正常（75 人）
+  - ✅ 前端 5 页面全部正常（登录/看板/检索/问答/系统管理）
+- Git commit pending
 
 **用户明确要求记录：**
 - 飞书不要发任何消息（DRY_RUN + TEST_MODE 默认开启）

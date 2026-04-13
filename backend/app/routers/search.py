@@ -3,7 +3,7 @@
 """
 import json
 import hashlib
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -19,6 +19,7 @@ router = APIRouter(prefix="/api/admin", tags=["search"])
 # Simple in-memory cache
 _cache = {}
 _CACHE_TTL = 300  # 5 minutes
+_CACHE_STATS = {"hits": 0, "misses": 0}
 
 
 def _cache_key(params: dict) -> str:
@@ -36,6 +37,33 @@ def _get_cached(key: str):
 
 def _set_cache(key: str, data):
     _cache[key] = (data, datetime.now())
+
+
+@router.get("/cache/stats", summary="查看缓存统计")
+def get_cache_stats():
+    """
+    查看缓存命中率、缓存条目数等信息
+    """
+    total = _CACHE_STATS["hits"] + _CACHE_STATS["misses"]
+    hit_rate = (_CACHE_STATS["hits"] / total * 100) if total > 0 else 0
+    
+    return {
+        "cache_entries": len(_cache),
+        "hits": _CACHE_STATS["hits"],
+        "misses": _CACHE_STATS["misses"],
+        "hit_rate_percent": round(hit_rate, 2),
+        "ttl_seconds": _CACHE_TTL,
+    }
+
+
+@router.post("/cache/clear", summary="清除所有缓存")
+def clear_cache():
+    """
+    手动清除所有缓存数据
+    """
+    global _cache
+    _cache = {}
+    return {"message": "缓存已清除", "cleared_entries": len(_cache)}
 
 
 @router.get("/search", summary="多条件数据检索")
@@ -79,7 +107,9 @@ def search_data(
         ck = _cache_key(params)
         cached = _get_cached(ck)
         if cached:
+            _CACHE_STATS["hits"] += 1
             return {"from_cache": True, **cached}
+        _CACHE_STATS["misses"] += 1
 
     # Build query
     d_start = date.fromisoformat(start_date) if start_date else today - timedelta(days=30)
