@@ -1,0 +1,15 @@
+[Unit]
+Description=CLM-REVIEW-TOOL Docker Compose Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/clm-review-tool
+ExecStart=/usr/bin/docker compose --env-file .env.prod up -d
+ExecStop=/usr/bin/docker compose --env-file .env.prod down
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

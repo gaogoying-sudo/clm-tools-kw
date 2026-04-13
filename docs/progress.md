@@ -103,6 +103,21 @@
 - 待用户配置：SOURCE_DB_HOST, SOURCE_DB_USER, SOURCE_DB_PASSWORD
 - Git commit pending
 
+**03:00** [小强] T09/T110 云部署准备完成
+- 创建部署文档：docs/DEPLOYMENT.md（完整部署指南）
+- 创建配置模板：.env.prod.template（生产环境配置）
+- 创建部署脚本：scripts/deploy-to-cloud.sh（自动化部署）
+- 创建 ADR-003: docs/decisions/003-cloud-deployment-strategy.md
+- 创建 systemd 服务文件：scripts/clm-review-tool.service
+- 创建 Nginx 配置模板：scripts/nginx.conf.template
+- 创建数据库备份脚本：scripts/backup-db.sh
+- 待用户手动操作：
+  1. SSH 登录云服务器：ssh root@82.156.187.35
+  2. 执行部署脚本：./deploy-to-cloud.sh
+  3. 配置 .env.prod 文件（数据库密码、源数据库连接等）
+  4. 验证部署并初始化数据
+- Git commit pending
+
 **用户明确要求记录：**
 - 飞书不要发任何消息（DRY_RUN + TEST_MODE 默认开启）
 - 云服务器部署暂缓，专注本地开发
