@@ -74,6 +74,7 @@ class SyncTask(Base):
     power_trace = Column(JSON, default=list, comment="功率轨迹 [{time,power,cmd}]")
     ingredients_timeline = Column(JSON, default=list, comment="投料时序 [{time,type,auto,cmd,name,dosage,unit}]")
     ingredient_notes = Column(JSON, default=list, comment="备菜须知 [{index,desc,img}]")
+    cook_steps = Column(JSON, default=list, comment="烹饪步骤 [{step,time,temp,cmd,desc}]")
     # 执行信号
     exec_count = Column(Integer, default=1, comment="执行次数")
     status = Column(String(20), default="passed", comment="passed/failed")

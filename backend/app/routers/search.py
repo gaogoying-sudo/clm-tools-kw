@@ -177,6 +177,16 @@ def search_data(
                     "device_id": t.device_id,
                     "exec_time": t.exec_time,
                     "modifications": t.modifications,
+                    # 详细数据
+                    "power_trace": t.power_trace or [],
+                    "ingredients_timeline": t.ingredients_timeline or [],
+                    "ingredient_notes": t.ingredient_notes or [],
+                    "cook_steps": t.cook_steps or [],
+                    "cooking_time": t.cooking_time,
+                    "max_power": t.max_power,
+                    "recipe_version": t.recipe_version,
+                    "recipe_type": t.recipe_type,
+                    "pot_type": t.pot_type,
                 }
                 for t in tasks
             ],

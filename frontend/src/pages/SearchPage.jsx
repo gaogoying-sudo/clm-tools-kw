@@ -1,8 +1,29 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api'
 
+const CACHE_KEY = 'clm_search_cache_v1'
+
 export function SearchPage() {
-  const [filters, setFilters] = useState({
+  // 从 localStorage 恢复缓存的查询条件和结果
+  const loadFromCache = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY)
+      if (cached) {
+        const { filters: savedFilters, results: savedResults, total: savedTotal, timestamp } = JSON.parse(cached)
+        // 5 分钟内有效
+        if (Date.now() - timestamp < 5 * 60 * 1000) {
+          return { savedFilters, savedResults, savedTotal }
+        }
+      }
+    } catch (e) {
+      console.error('Load cache error:', e)
+    }
+    return null
+  }
+
+  const cache = loadFromCache()
+  
+  const [filters, setFilters] = useState(cache?.savedFilters || {
     startDate: new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10),
     endDate: new Date().toISOString().slice(0, 10),
     engineerName: '',
@@ -10,13 +31,27 @@ export function SearchPage() {
     status: '',
     hasAbnormal: '',
   })
-  const [results, setResults] = useState([])
-  const [total, setTotal] = useState(0)
+  const [results, setResults] = useState(cache?.savedResults || [])
+  const [total, setTotal] = useState(cache?.savedTotal || 0)
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [fromCache, setFromCache] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
   const [engineers, setEngineers] = useState([])
+
+  // 保存到 localStorage
+  const saveToCache = (filters, results, total) => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        filters,
+        results,
+        total,
+        timestamp: Date.now(),
+      }))
+    } catch (e) {
+      console.error('Save cache error:', e)
+    }
+  }
 
   useEffect(() => {
     api.getEngineers('').then(setEngineers).catch(() => {})
@@ -38,9 +73,12 @@ export function SearchPage() {
       if (filters.hasAbnormal) params.has_abnormal = filters.hasAbnormal === 'true'
 
       const data = await api.searchData(params)
-      setResults(data.items || [])
+      const newResults = data.items || []
+      setResults(newResults)
       setTotal(data.total_all || 0)
       setFromCache(data.from_cache || false)
+      // 保存到 localStorage
+      saveToCache(filters, newResults, data.total_all || 0)
     } catch (err) {
       console.error('Search error:', err)
       setResults([])
@@ -162,21 +200,117 @@ export function SearchPage() {
 
                 {expandedId === item.session_id && (
                   <div className="px-6 pb-4 border-t border-gray-100">
-                    <div className="mt-3">
+                    <div className="mt-3 space-y-4">
                       <div className="text-sm font-medium text-gray-700 mb-2">任务详情</div>
-                      <div className="grid grid-cols-2 gap-3">
-                        {item.tasks?.map(t => (
-                          <div key={t.id} className={`p-3 rounded-lg text-sm ${t.has_abnormal ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
-                            <div className="font-medium text-gray-900">{t.dish_name}</div>
-                            <div className="text-gray-500 mt-1">
-                              执行 {t.exec_count} 次 · 状态: {t.status === 'failed' ? <span className="text-red-600">失败</span> : <span className="text-green-600">通过</span>}
-                            </div>
-                            {t.customer_name && <div className="text-gray-400 text-xs mt-1">{t.customer_name} · {t.device_id}</div>}
-                            {t.modifications?.length > 0 && (
-                              <div className="mt-2 text-xs text-orange-600">
-                                调整记录: {t.modifications.join('；')}
+                      <div className="space-y-4">
+                        {item.tasks?.map((t, idx) => (
+                          <div key={t.id} className={`rounded-lg border ${t.has_abnormal ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
+                            {/* 基础信息 */}
+                            <div className="p-4 border-b border-gray-200">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs text-gray-500">Task #{idx + 1}</span>
+                                  <span className="font-medium text-gray-900">{t.dish_name}</span>
+                                  {t.has_abnormal && <span className="px-2 py-0.5 bg-red-200 text-red-700 text-xs rounded">异常</span>}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  执行 {t.exec_count} 次 · 
+                                  {t.status === 'failed' ? <span className="text-red-600 font-medium">失败</span> : <span className="text-green-600 font-medium">通过</span>}
+                                </div>
                               </div>
-                            )}
+                              {(t.customer_name || t.device_id) && (
+                                <div className="text-xs text-gray-500">{t.customer_name} · {t.device_id}</div>
+                              )}
+                              {t.modifications?.length > 0 && (
+                                <div className="mt-2 text-xs text-orange-600">
+                                  调整记录：{t.modifications.join('；')}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 详细数据瀑布流 */}
+                            <div className="p-4 grid grid-cols-2 gap-4">
+                              {/* 功率轨迹 */}
+                              {t.power_trace?.length > 0 && (
+                                <div className="col-span-2">
+                                  <div className="text-xs font-medium text-gray-600 mb-2">⚡ 功率轨迹（{t.power_trace.length}个点）</div>
+                                  <div className="h-32 bg-white rounded border border-gray-200 p-2 overflow-x-auto">
+                                    <div className="flex items-end gap-1 h-full" style={{minWidth: `${t.power_trace.length * 20}px`}}>
+                                      {t.power_trace.slice(0, 50).map((pt, i) => {
+                                        const height = Math.min(100, (pt.power || 0) / 120)
+                                        return (
+                                          <div key={i} className="flex-1 bg-blue-500 rounded-t" style={{height: `${height}%`}} title={`${pt.time || i}s: ${pt.power}W`}></div>
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 投料时序 */}
+                              {t.ingredients_timeline?.length > 0 && (
+                                <div>
+                                  <div className="text-xs font-medium text-gray-600 mb-2">🥘 投料时序</div>
+                                  <div className="space-y-1">
+                                    {t.ingredients_timeline.map((ing, i) => (
+                                      <div key={i} className="text-xs bg-white rounded px-2 py-1 border border-gray-200 flex items-center justify-between">
+                                        <span className="text-gray-700">{ing.name || ing.type || '食材'}</span>
+                                        <span className="text-gray-500">{ing.time || ''} · {ing.dosage || ''}{ing.unit || ''}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 烹饪步骤 */}
+                              {t.cook_steps?.length > 0 && (
+                                <div>
+                                  <div className="text-xs font-medium text-gray-600 mb-2">📋 烹饪步骤</div>
+                                  <div className="space-y-1">
+                                    {t.cook_steps.slice(0, 10).map((step, i) => (
+                                      <div key={i} className="text-xs bg-white rounded px-2 py-1 border border-gray-200">
+                                        <span className="text-gray-700">{i + 1}. {step.desc || step.cmd || ''}</span>
+                                        {step.time && <span className="text-gray-500 ml-2">{step.time}s</span>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 备菜须知 */}
+                              {t.ingredient_notes?.length > 0 && (
+                                <div className="col-span-2">
+                                  <div className="text-xs font-medium text-gray-600 mb-2">📝 备菜须知</div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {t.ingredient_notes.map((note, i) => (
+                                      <span key={i} className="text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded border border-yellow-200">
+                                        {note.desc || note}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 烹饪参数 */}
+                              <div className="col-span-2 grid grid-cols-4 gap-2 text-xs">
+                                <div className="bg-white rounded px-2 py-1 border border-gray-200">
+                                  <span className="text-gray-500">烹饪时长</span>
+                                  <div className="font-medium text-gray-900">{t.cooking_time || 0}s</div>
+                                </div>
+                                <div className="bg-white rounded px-2 py-1 border border-gray-200">
+                                  <span className="text-gray-500">最大功率</span>
+                                  <div className="font-medium text-gray-900">{t.max_power || 0}W</div>
+                                </div>
+                                <div className="bg-white rounded px-2 py-1 border border-gray-200">
+                                  <span className="text-gray-500">菜谱版本</span>
+                                  <div className="font-medium text-gray-900">v{t.recipe_version || 0}</div>
+                                </div>
+                                <div className="bg-white rounded px-2 py-1 border border-gray-200">
+                                  <span className="text-gray-500">锅型</span>
+                                  <div className="font-medium text-gray-900">#{t.pot_type || 0}</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
